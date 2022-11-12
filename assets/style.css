@@ -1,0 +1,38 @@
+* {
+    font-family: Helvetica; 
+}
+body{
+    background: #eaeaea;
+    color: #555555;
+}
+/* Fix table head */
+.tableFixHead    { overflow: auto; height: 700px;}
+/*.tableFixHead th { position: sticky; top: 0;} */
+
+/* Just common table stuff. */
+table  { border-collapse: collapse; width: 100%}
+th     { background:rgb(255, 253, 253)}
+
+
+.font_style{
+    color: #555555;
+}
+
+label{
+    color: #555555;
+}
+
+.card_custom_color{
+    background: #F7F9F9;
+    background-size: 202%;
+  }
+
+h2 {
+    display: block;
+    font-size: 1.5em;
+    margin-block-start: 0.83em;
+    margin-block-end: 0.83em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+}
