@@ -7,7 +7,7 @@ from dash import dcc, html
 import pandas as pd
 import numpy as np
 from datetime import timedelta
-
+from colour import Color
 
 
 def get_missing_dates(dates, date, max_date): 
@@ -19,6 +19,11 @@ def get_missing_dates(dates, date, max_date):
             dt_breaks.append(date)
     return 
 
+def get_gradient_color(n):
+    green = Color("#69C574")
+    colors = [str(x) for x in list(green.range_to(Color("#34829E"), n))]
+    return colors
+
 
 def historical_curve(df, x_label, y_label, title, ytitle, grouped='price_type', graph_type='Line', mode='lines+markers'):
     df.dropna(inplace=True) 
@@ -28,7 +33,8 @@ def historical_curve(df, x_label, y_label, title, ytitle, grouped='price_type', 
     hovertemplate = '%{y:,}'
     if 'Percentage' in graph_type: 
         hovertemplate = "%{y}% (%{customdata[0]:,})" 
-    for cDate, color in zip(df[grouped].drop_duplicates(), ['#69C574', '#34829E']):
+    colors = get_gradient_color(len(df[grouped].drop_duplicates()))
+    for cDate, color in zip(df[grouped].drop_duplicates(), colors):
         serie_df = df[df[grouped] == cDate]
         serie_df = serie_df.sort_values(by=[x_label])
         serie_df[x_label] = serie_df[x_label].map(lambda x: x.strftime("%d-%b %H:%M"))
@@ -40,7 +46,7 @@ def historical_curve(df, x_label, y_label, title, ytitle, grouped='price_type', 
                 y=serie_df[y_label], 
                 mode=mode,
                 marker=dict(size=5),
-                marker_color=color,
+                # marker_color=color,
                 name=cDate,
                 line=dict(width=1.8), 
                 line_shape='spline', 
@@ -51,7 +57,7 @@ def historical_curve(df, x_label, y_label, title, ytitle, grouped='price_type', 
             fig.add_trace(go.Bar(
                 x=serie_df[x_label], 
                 y=serie_df[y_label], 
-                marker_color=color,
+                # marker_color=color,
                 name=cDate, 
                 customdata=serie_df.filter(['Total'], axis=1).values,
                 hovertemplate=hovertemplate

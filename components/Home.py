@@ -166,8 +166,9 @@ def update_candidate_dropdown(click, name, counties, state_abbr, race_id):
             FROM TFN_DB.primary{race_id}Election2022Histo
             WHERE state_abbr='{state_abbr}' and county='{counties}' and name IN {name} order by date;
         ''')
+    
     data['date'] = pd.to_datetime(data['date'])
-    data = data.drop_duplicates(subset=['county', 'county_votes'])
-    chart = curve.historical_curve(data, 'date', 'county_votes', f'Votes increase on the election period for {", ".join(name)} - {race_id}', 'Date', 'name', 'bar')
+    data = data.drop_duplicates(subset=['county', 'county_votes', 'name'])
+    chart = curve.historical_curve(data, 'date', 'county_votes', f'Votes increase on the election period for {", ".join(name)} - {race_id}', 'Vote Increase', 'name', 'bar')
     return chart
 
