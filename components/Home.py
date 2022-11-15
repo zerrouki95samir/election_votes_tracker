@@ -61,18 +61,18 @@ layout = html.Div(children=[
                 style={"width": 200}, 
                 searchable=True
             )),
-            dcc.Loading(dmc.MultiSelect(
+            dcc.Loading(dmc.Select(
                 label="Select a county",
                 description="Select one county.",
                 id="county_id",
                 style={"minWidth": 300}, 
                 searchable=True
             )),
-            dcc.Loading(dmc.Select(
+            dcc.Loading(dmc.MultiSelect(
                 label="Select a candidate",
                 description="Select one candidate.",
                 id="candidate_id",
-                style={"width": 200}, 
+                # style={"width": 200}, 
                 searchable=True
             )), 
             dmc.Button(
@@ -116,7 +116,7 @@ def update_county_dropdown(state_abbr, race_id):
         FROM TFN_DB.primary{race_id}Election2022Histo
         WHERE state_abbr='{state_abbr}';
     ''')
-    return data.county.tolist(), data.county.values[:2]
+    return data.county.tolist(), data.county.values[0]
 
 
 @app.callback(
@@ -128,15 +128,13 @@ def update_county_dropdown(state_abbr, race_id):
     State('race_id', 'value')
 )
 def update_candidate_dropdown(counties, state_abbr, race_id): 
-    counties += ['']
-    counties = tuple(counties)
     
     data = mydb.query(f'''
         SELECT DISTINCT name 
         FROM TFN_DB.primary{race_id}Election2022Histo
-        WHERE state_abbr='{state_abbr}' and county IN {counties};
+        WHERE state_abbr='{state_abbr}' and county = '{counties}';
     ''')
-    return data.name.tolist()+['TOTAL VOTES'], data.name.values[0] # , 'TOTAL BY PARTY'
+    return data.name.tolist()+['TOTAL VOTES'], data.name.values[:2] # , 'TOTAL BY PARTY'
 
 
 @app.callback(
@@ -149,13 +147,16 @@ def update_candidate_dropdown(counties, state_abbr, race_id):
     State('race_id', 'value')
 )
 def update_candidate_dropdown(click, name, counties, state_abbr, race_id): 
-    counties += ['']
-    counties = tuple(counties)
+    # counties += ['']
+    # counties = tuple(counties)
+    print(counties)
+    name += ['']
+    name = tuple(name)
     if name == 'TOTAL VOTES': 
         data = mydb.query(f'''
             SELECT distinct MAX(county) as county, max(date) as date, SUM(county_votes) as county_votes, MAX(extracted_at) AS extracted_at
             FROM TFN_DB.primary{race_id}Election2022Histo
-            WHERE state_abbr='{state_abbr}' and county IN {counties}
+            WHERE state_abbr='{state_abbr}' and county='{counties}'
             GROUP BY county, date 
             order by date;
         ''')
@@ -163,10 +164,10 @@ def update_candidate_dropdown(click, name, counties, state_abbr, race_id):
         data = mydb.query(f'''
             SELECT distinct county, name, county_percent, county_votes, date, extracted_at
             FROM TFN_DB.primary{race_id}Election2022Histo
-            WHERE state_abbr='{state_abbr}' and county IN {counties} and name='{name}' order by date;
+            WHERE state_abbr='{state_abbr}' and county='{counties}' and name IN {name} order by date;
         ''')
     data['date'] = pd.to_datetime(data['date'])
     data = data.drop_duplicates(subset=['county', 'county_votes'])
-    chart = curve.historical_curve(data, 'date', 'county_votes', f'Votes increase on the election period for {name} - {race_id}', 'Date', 'county', 'bar')
+    chart = curve.historical_curve(data, 'date', 'county_votes', f'Votes increase on the election period for {", ".join(name)} - {race_id}', 'Date', 'name', 'bar')
     return chart
 
