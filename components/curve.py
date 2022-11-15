@@ -35,7 +35,7 @@ def historical_curve(df, x_label, y_label, title, ytitle, grouped='price_type', 
         hovertemplate = "%{y}% (%{customdata[0]:,})" 
     colors = get_gradient_color(len(df[grouped].drop_duplicates()))
     for cDate, color in zip(df[grouped].drop_duplicates(), colors):
-        serie_df = df[df[grouped] == cDate]
+        serie_df = df[df[grouped] == cDate].copy()
         serie_df = serie_df.sort_values(by=[x_label])
         serie_df[x_label] = serie_df[x_label].map(lambda x: x.strftime("%d-%b %H:%M"))
         # serie_df[x_label] = serie_df[x_label].map(lambda d: d.strftime('%d-%b-%y'))
@@ -63,11 +63,11 @@ def historical_curve(df, x_label, y_label, title, ytitle, grouped='price_type', 
                 hovertemplate=hovertemplate
                 ), row=1, col=1)
      
-    dt_breaks = get_missing_dates(
-        df[x_label].drop_duplicates().tolist(), 
-        df[x_label].min(),
-        df[x_label].max()
-    )
+    # dt_breaks = get_missing_dates(
+    #     df[x_label].drop_duplicates().tolist(), 
+    #     df[x_label].min(),
+    #     df[x_label].max()
+    # )
 
     # xtickformat='%d-%b-%y'
     fig.update_layout(
@@ -102,6 +102,8 @@ def historical_curve(df, x_label, y_label, title, ytitle, grouped='price_type', 
         )
     )
     # tickmode='linear', 
+    # df[x_label].drop_duplicates().tolist()
+    df[x_label] = df[x_label].map(lambda x: x.strftime("%d-%b %H:%M"))
     fig.update_xaxes(categoryorder='array', categoryarray= df[x_label].drop_duplicates().tolist())
     fig.update_traces(
         opacity=1
